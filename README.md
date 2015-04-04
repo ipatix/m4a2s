@@ -3,3 +3,5 @@
 
 DO NOT TRY TO BUILD!
 This tool isn't finished and work needs to be done before one can build it.
+
+"m4a2s" is released under the terms of GPLv3. See LICENSE.txt

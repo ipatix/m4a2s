@@ -25,6 +25,7 @@ namespace m4a2s
             }
 
             Rom.LoadRom(args[1], songtable);
+
         }
 
         

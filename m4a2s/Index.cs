@@ -13,12 +13,12 @@ namespace m4a2s
         private static Hashtable _hashtable;
         private static int _numSongs;
 
-        private static string _songGuids;
-        private static string _bankGuids;
-        private static string _mapGuids;
-        private static string _drumGuids;
-        private static string _waveGuids;
-        private static string _gbwaveGuids;
+        private static string _songGuids = "song";
+        private static string _bankGuids = "bank";
+        private static string _mapGuids = "map";
+        private static string _drumGuids = "drums";
+        private static string _waveGuids = "wave";
+        private static string _gbwaveGuids = "gbwave";
 
         public static void IndexRom()
         {
@@ -39,14 +39,14 @@ namespace m4a2s
             int numWaves = 0;
             int numMaps = 0;
 
-            for (int i = 0; i < _numSongs; i++)
+            for (int currentSong = 0; currentSong < _numSongs; currentSong++)
             {
                 // hash all songs
-                Rom.Reader.BaseStream.Position = Rom.SongtableOffset + (i*8);
+                Rom.Reader.BaseStream.Position = Rom.SongtableOffset + (currentSong * 8);
                 int currentSongPointer = Rom.Reader.ReadInt32() - Rom.Map;
                 Rom.Reader.ReadInt32(); // drop the two song group bytes x2 cuz we don't need 'em
                 if (!_hashtable.Contains(currentSongPointer))
-                    _hashtable.Add(currentSongPointer, new Entity(EntityType.Song, currentSongPointer, _songGuids + "_" + i.ToString("D3"), -1));
+                    _hashtable.Add(currentSongPointer, new Entity(EntityType.Song, currentSongPointer, _songGuids + "_" + currentSong.ToString("D3"), -1));
                 // now hash the voicegroup
                 Rom.Reader.BaseStream.Position = currentSongPointer;
                 Rom.Reader.BaseStream.Position += 4;

@@ -271,6 +271,16 @@ namespace m4a2s
             "mod_vib", "mod_tre", "mod_pan"
         };
 
+        public static readonly string[] WaveDuty =
+        {
+            "WaveDuty12", "WaveDuty25", "WaveDuty50", "WaveDuty75"
+        };
+
+        public static readonly string[] NoisePattern =
+        {
+            "FineNoise", "RoughNoise"
+        };
+
         public static string Gtp(byte gateTime)
         {
             if (gateTime == 0 || gateTime > 3) return gateTime.ToString();

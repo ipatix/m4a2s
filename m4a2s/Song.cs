@@ -58,6 +58,8 @@ namespace m4a2s
                 // set reader position
                 Rom.Reader.BaseStream.Position = trackOffsets[cTrack]; 
 
+                Event lastEvent = Event.None;
+
                 while(true)
                 {
                     byte cmd = Rom.Reader.ReadByte();
@@ -230,6 +232,13 @@ namespace m4a2s
 
             oasm.AppendLine();
             oasm.AppendLine("\t.end");
+
+            File.WriteAllText(destFile, oasm.ToString());
         }
+    }
+
+    enum Event
+    {
+        Vol, Pan, Bend, Bendr, Mod, Tune, Xcmd, Eot, Tie, Note, None
     }
 }

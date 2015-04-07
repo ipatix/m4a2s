@@ -266,7 +266,7 @@ namespace m4a2s
             "mem_mem_bls", "mem_mem_blo"
         };
 
-        public static readonly string[] Mod =
+        public static readonly string[] Modt =
         {
             "mod_vib", "mod_tre", "mod_pan"
         };

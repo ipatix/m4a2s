@@ -15,11 +15,11 @@ namespace m4a2s
 
             StringBuilder oasm = new StringBuilder();
 
-            for (int cInstr = 0; cInstr < vgr.VoicegroupLength: cInstr++)
+            for (int cInstr = 0; cInstr < vgr.VoicegroupLength; cInstr++)
             {
                 Rom.Reader.BaseStream.Position = vgr.Offset + (cInstr*12);
 
-                uint instrType = Rom.Reader.ReadUint32();
+                uint instrType = Rom.Reader.ReadUInt32();
 
                 switch (instrType & 0xFF)
                 {
@@ -32,9 +32,6 @@ namespace m4a2s
                     case 0x9:
                     case 0x2:
                     case 0xA:
-                    case 0x3:
-                    case 0xB:
-                        break;
                     case 0x3:
                     case 0xB:
                         break;

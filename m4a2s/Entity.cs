@@ -2,7 +2,7 @@
 {
     class Entity
     {
-        public EntityType Type { get; private set; };
+        public EntityType Type { get; private set; }
         public int Offset { get; private set; }
         public string Guid { get; private set; }
 

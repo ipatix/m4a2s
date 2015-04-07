@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace m4a2s
 {
@@ -22,10 +19,10 @@ namespace m4a2s
 
             Rom.Reader.BaseStream.Position = songOffset;
 
-            byte numTracks = (byte) Rom.Reader.ReadByte();
-            byte numBlocks = (byte) Rom.Reader.ReadByte(); // as usual, the usage of this byte is unknown
-            byte priority = (byte) Rom.Reader.ReadByte();
-            byte reverb = (byte) Rom.Reader.ReadByte();
+            byte numTracks = Rom.Reader.ReadByte();
+            byte numBlocks = Rom.Reader.ReadByte(); // as usual, the usage of this byte is unknown
+            byte priority = Rom.Reader.ReadByte();
+            byte reverb = Rom.Reader.ReadByte();
 
             int vgrOffset = Rom.Reader.ReadInt32() - Rom.Map;
             int[] trackOffsets = new int[numTracks];
@@ -37,7 +34,7 @@ namespace m4a2s
 
             oasm.AppendLine("\t.include \"MPlayDef.s\"");
             oasm.AppendLine();
-            oasm.AppendLine("\t.equ\t" + song.Guid + "_grp, " + index[vgrOffset].Guid);
+            oasm.AppendLine("\t.equ\t" + song.Guid + "_grp, " + ((Entity) index[vgrOffset]).Guid);
             oasm.AppendLine("\t.equ\t" + song.Guid + "_pri, " + priority);
             oasm.AppendLine("\t.equ\t" + song.Guid + "_rev, " + reverb);
             oasm.AppendLine("\t.equ\t" + song.Guid + "_mvl, 127");
@@ -79,7 +76,8 @@ namespace m4a2s
                     {
                         oasm.AppendLine("\t.byte\tGOTO");
                         int targetPosition = Rom.Reader.ReadInt32() - Rom.Map;
-                        oasm.AppendLine("\t .word\t" + song.Guid + "_" + cTrack + " + 0x" + (targetPosition - trackOffsets[cTrack]).ToString("X"))
+                        oasm.AppendLine("\t .word\t" + song.Guid + "_" + cTrack + " + 0x" +
+                                        (targetPosition - trackOffsets[cTrack]).ToString("X"));
                     }
                     // if PATT
                     else if (cmd == 0xB3)
@@ -96,7 +94,7 @@ namespace m4a2s
                     // if REPT
                     else if (cmd == 0xB5)
                     {
-                        byte numRepeats = (byte) Rom.Reader.ReadByte();
+                        byte numRepeats = Rom.Reader.ReadByte();
                         oasm.AppendLine("\t.byte\tREPT  , " + numRepeats);
                         int targetPosition = Rom.Reader.ReadInt32() - Rom.Map;
                         oasm.AppendLine("\t .word\t" + song.Guid + "_" + cTrack + " + 0x" + (targetPosition - trackOffsets[cTrack]).ToString("X"));
@@ -104,12 +102,15 @@ namespace m4a2s
                     // if MEMACC
                     else if (cmd == 0xB9)
                     {
-                        throw new NotImplementedException(); // TODO
+                        byte par1 = Rom.Reader.ReadByte();
+                        byte par2 = Rom.Reader.ReadByte();
+                        byte par3 = Rom.Reader.ReadByte();
+                        oasm.AppendLine("\t.byte\tMEMACC, " + par1 + ", " + par2 + ", " + par3);
                     }
                     // if PRIO
                     else if (cmd == 0xBA)
                     {
-                        byte prio = (byte) Rom.Reader.ReadByte();
+                        byte prio = Rom.Reader.ReadByte();
                         oasm.AppendLine("\t.byte\tPRIO  , " + prio);
                     }
                     // if TEMPO
@@ -124,81 +125,238 @@ namespace m4a2s
                         int shift = Rom.Reader.ReadSByte();
                         string str;
                         if (shift < 0) str = shift.ToString();
-                        else str = "+" + shift.ToString();
+                        else str = "+" + shift;
                         oasm.AppendLine("\t.byte\tKEYSH , " + song.Guid + "_key" + str);
+                    }
+                    // if VOICE
+                    else if (cmd == 0xBD)
+                    {
+                        byte instr = Rom.Reader.ReadByte();
+                        oasm.AppendLine("\t.byte\t\tVOICE , " + instr);
                     }
                     /*
                      * from here repeatable commands will follow
                      */
-                    // if VOICE
-                    else if (cmd == 0xBD)
-                    {
-                        
-                    }
                     // if VOL
                     else if (cmd == 0xBE)
                     {
-
+                        byte vol = Rom.Reader.ReadByte();
+                        oasm.AppendLine("\t.byte\t\tVOL   , " + vol + "*" + song.Guid + "_mvl/mxv");
+                        lastEvent = Event.Vol;
                     }
                     // if PAN
                     else if (cmd == 0xBF)
                     {
-
+                        byte pan = Rom.Reader.ReadByte();
+                        string str;
+                        if (pan < 0x40) str = (pan - 0x40).ToString();
+                        else str = "+" + (pan - 0x40);
+                        oasm.AppendLine("\t.byte\t\tPAN   , " + str);
+                        lastEvent = Event.Pan;
                     }
                     // if BEND
                     else if (cmd == 0xC0)
                     {
-
+                        byte bend = Rom.Reader.ReadByte();
+                        string str;
+                        if (bend < 0x40) str = (bend - 0x40).ToString();
+                        else str = "+" + (bend - 0x40);
+                        oasm.AppendLine("\t.byte\t\tBEND  , " + str);
+                        lastEvent = Event.Bend;
                     }
                     // if BENDR
                     else if (cmd == 0xC1)
                     {
-
+                        byte bendr = Rom.Reader.ReadByte();
+                        oasm.AppendLine("\t.byte\t\tBENDR , " + bendr);
+                        lastEvent = Event.Bendr;
                     }
                     // if LFOS
                     else if (cmd == 0xC2)
                     {
-
+                        byte lfos = Rom.Reader.ReadByte();
+                        oasm.AppendLine("\t.byte\t\tLFOS  , " + lfos);
                     }
                     // if LFODL
                     else if (cmd == 0xC3)
                     {
-
+                        byte lfodl = Rom.Reader.ReadByte();
+                        oasm.AppendLine("\t.byte\t\tLFODL , " + lfodl);
                     }
                     // if MOD
                     else if (cmd == 0xC4)
                     {
-
+                        byte mod = Rom.Reader.ReadByte();
+                        oasm.AppendLine("\t.byte\t\tMOD   , " + mod);
+                        lastEvent = Event.Mod;
                     }
                     // if MODT
                     else if (cmd == 0xC5)
                     {
-                        
+                        byte modt = Rom.Reader.ReadByte();
+                        if (modt < 3) oasm.AppendLine("\t.byte\t\tMODT  , " + Tables.Modt[modt]);
+                        else oasm.AppendLine("\t.byte\t\tMODT  , " + modt);
                     }
                     // if TUNE
                     else if (cmd == 0xC8)
                     {
-
+                        byte tune = Rom.Reader.ReadByte();
+                        string str;
+                        if (tune < 0x40) str = (tune - 0x40).ToString();
+                        else str = "+" + (tune - 0x40);
+                        oasm.AppendLine("\t.byte\t\tBEND  , " + str);
+                        lastEvent = Event.Bend;
                     }
                     // if XCMD
                     else if (cmd == 0xCD)
                     {
-
+                        byte xcmdtype = Rom.Reader.ReadByte();
+                        byte xcmdarg = Rom.Reader.ReadByte();
+                        if (xcmdtype == 0x8)
+                        {
+                            oasm.AppendLine("\t.byte\t\tXCMD  , xIECV , " + xcmdarg);
+                        }
+                        else if (xcmdtype == 0x9)
+                        {
+                            oasm.AppendLine("\t.byte\t\tXCMD  , xIECL , " + xcmdarg);
+                        }
+                        else
+                        {
+                            throw new NotSupportedException("Invalid XCMD Type");
+                        }
                     }
                     // if EOT
                     else if (cmd == 0xCE)
                     {
+                        if (Rom.ReaderPeekByte() <= 127)
+                        {
+                            oasm.AppendLine("\t.byte\t\tEOT   , " + Tables.Nxx[Rom.Reader.ReadByte()]);
+                        }
+                        else
+                        {
+                            oasm.AppendLine("\t.byte\t\tEOT");
+                        }
 
-                    }
-                    // if TIE
-                    else if (cmd == 0xCF)
-                    {
-
+                        lastEvent = Event.Eot;
                     }
                     // if NOTE
-                    else if (cmd >= 0xD0 && cmd <= (0xD0 + 47))
+                    else if (cmd >= 0xCF && cmd <= (0xD0 + 47))
                     {
+                        oasm.Append("\t.byte\t\t" + Tables.Nxx[cmd - 0xCF]);
+                        if (Rom.ReaderPeekByte() > 127) // peek note pitch
+                        {
+                            oasm.AppendLine();
+                        }
+                        else
+                        {
+                            oasm.AppendLine("   , " + Tables.Note[Rom.Reader.ReadByte()]);
+                            if (Rom.ReaderPeekByte() > 127) // peek note velocity
+                            {
+                                oasm.AppendLine();
+                            }
+                            else
+                            {
+                                oasm.Append(", v" + Rom.Reader.ReadByte().ToString("D3"));
+                                if (Rom.ReaderPeekByte() > 127)
+                                {
+                                    oasm.AppendLine();
+                                }
+                                else
+                                {
+                                    oasm.AppendLine(", " + Tables.Gtp(Rom.Reader.ReadByte()));
+                                }
+                            }
+                        }
+                    }
+                    else if (cmd >= 0x0 && cmd <= 0x7F)
+                    {
+                        if (lastEvent == Event.Bend)
+                        {
+                            int bend = cmd - 0x40;
+                            string str;
+                            if (bend < 0) str = bend.ToString();
+                            else str = "+" + bend;
+                            oasm.AppendLine("\t.byte\t\t        c_v" + str);
+                        }
+                        else if (lastEvent == Event.Bendr)
+                        {
+                            oasm.AppendLine("\t.byte\t\t        " + cmd);
+                        }
+                        else if (lastEvent == Event.Eot)
+                        {
+                            oasm.AppendLine("\t.byte\t\t        " + Tables.Note[cmd]);
+                        }
+                        else if (lastEvent == Event.Mod)
+                        {
+                            oasm.AppendLine("\t.byte\t\t        " + cmd);
+                        }
+                        else if (lastEvent == Event.None)
+                        {
+                            throw new Exception("Trying to repeat an event that hasn't occured yet");
+                        }
+                        else if (lastEvent == Event.Note)
+                        {
+                            oasm.Append("\t.byte\t\t        " + Tables.Note[cmd]);
+                            if (Rom.ReaderPeekByte() > 128) // probe for velocity
+                            {
+                                oasm.AppendLine();
+                            }
+                            else
+                            {
+                                oasm.Append(", v" + Rom.Reader.ReadByte().ToString("D3"));
+                                if (Rom.ReaderPeekByte() > 128) // peek for gate time
+                                {
+                                    oasm.AppendLine();
+                                }
+                                else
+                                {
+                                    oasm.AppendLine(", " + Tables.Gtp(Rom.Reader.ReadByte()));
+                                }
+                            }
+                        }
+                        else if (lastEvent == Event.Pan)
+                        {
+                            int pan = cmd - 0x40;
+                            string str;
+                            if (pan < 0) str = pan.ToString();
+                            else str = "+" + pan;
+                            oasm.AppendLine("\t.byte\t\t        c_v" + str);
+                        }
+                        else if (lastEvent == Event.Tune)
+                        {
+                            int tune = cmd - 0x40;
+                            string str;
+                            if (tune < 0) str = tune.ToString();
+                            else str = "+" + tune;
+                            oasm.AppendLine("\t.byte\t\t        c_v" + str);
+                        }
+                        else if (lastEvent == Event.Vol)
+                        {
+                            oasm.AppendLine("\t.byte\t\t        " + cmd + "*" + song.Guid + "_mvl/mxv");
+                        }
+                        else if (lastEvent == Event.Xcmd)
+                        {
+                            byte xcmdtype = cmd;
+                            byte xcmdarg = Rom.Reader.ReadByte();
 
+                            if (xcmdtype == 0x8)
+                            {
+                                oasm.AppendLine("\t.byte\t\t        xIECV , " + xcmdarg);
+                            }
+                            else if (xcmdtype == 0x9)
+                            {
+                                oasm.AppendLine("\t.byte\t\t        xIECL , " + xcmdarg);
+                            }
+                            else
+                            {
+                                throw new NotSupportedException("Invalid XCMD Type");
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception("This Exception shouldn't be able to occur!");
+                        }
+                    
                     }
                     // if an unsupported command occurs
                     else
@@ -225,7 +383,7 @@ namespace m4a2s
             oasm.AppendLine("\t.word\t" + song.Guid + "_grp");
             oasm.AppendLine();
 
-            for (int i = 0, i < numTracks; i++)               
+            for (int i = 0; i < numTracks; i++)               
             {
                 oasm.AppendLine("\t.word\t" + song.Guid + "_" + i);
             }
@@ -239,6 +397,6 @@ namespace m4a2s
 
     enum Event
     {
-        Vol, Pan, Bend, Bendr, Mod, Tune, Xcmd, Eot, Tie, Note, None
+        Vol, Pan, Bend, Bendr, Mod, Tune, Xcmd, Eot, Note, None
     }
 }

@@ -30,5 +30,13 @@ namespace m4a2s
         {
             get { return _rom.Length; }
         }
+
+        public static int ReaderPeekByte()
+        {
+            long org = Reader.BaseStream.Position;
+            byte ret = Reader.ReadByte();
+            Reader.BaseStream.Position = org;
+            return ret;
+        }
     }
 }

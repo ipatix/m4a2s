@@ -9,7 +9,7 @@ namespace m4a2s
 {
     class Wave
     {
-        public static void disassemble(int waveOffset, Hashtable index, string destFile)
+        public static void disassemble(Hashtable index, Entity wave, string destFile)
         {
             
         }
@@ -17,7 +17,7 @@ namespace m4a2s
 
     class GbWave
     {
-        public static void disassemble(int gbWaveOffset, Hashtable index, string destFile)
+        public static void disassemble(Hashtable index, Entity gbwave, string destFile)
         {
             
         }

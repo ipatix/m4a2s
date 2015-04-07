@@ -9,7 +9,7 @@ namespace m4a2s
 {
     class Voicegroup
     {
-        public static void disassemble(int vgrOffset, Hashtable index, string destFile)
+        public static void disassemble(Hashtable index, Entity vgr, string destFile)
         {
             
         }

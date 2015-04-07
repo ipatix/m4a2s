@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,32 +10,9 @@ namespace m4a2s
 {
     class Song
     {
-        private int offset;
-
-        private byte numTracks;
-        private byte numBlocks;
-        private byte priority;
-        private byte reverb;
-        private int voicegroupPtr;
-        private int[] tracksPtr;
-
-        private Stream inputStream;
-
-        public Song(Stream inputStream, int offset)
+        public static void disassemble(int songOffset, Hashtable index, string destFile)
         {
-            this.inputStream = inputStream;
-            this.offset = offset;
+            
         }
-    }
-
-    struct SongNode
-    {
-        public Song Song;
-        public byte MusicPlayer;
-    }
-
-    class Track
-    {
-        
     }
 }

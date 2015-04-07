@@ -2,7 +2,7 @@
 {
     class Entity
     {
-        private EntityType _type;
+        public EntityType Type { get; private set; };
         public int Offset { get; private set; }
         public string Guid { get; private set; }
 
@@ -11,7 +11,7 @@
 
         public Entity(EntityType type, int offset, string guid, int voicegroupLength)
         {
-            _type = type;
+            Type = type;
             VoicegroupLength = voicegroupLength;
             Offset = offset;
             Guid = guid;

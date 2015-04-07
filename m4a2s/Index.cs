@@ -13,12 +13,17 @@ namespace m4a2s
         private static Hashtable _hashtable;
         private static int _numSongs;
 
-        private static string _songGuids = "song";
+        private static string _songGuids = "seq";
         private static string _bankGuids = "bank";
         private static string _mapGuids = "map";
         private static string _drumGuids = "drums";
         private static string _waveGuids = "wave";
         private static string _gbwaveGuids = "gbwave";
+
+        public static Hashtable GetHashtable()
+        {
+            return _hashtable;
+        }
 
         public static void IndexRom()
         {

@@ -9,11 +9,10 @@ namespace m4a2s
     {
         static void Main(string[] args)
         {
-            if (args.Length != 3) ShowUsage();
+            int songtable = 0x4A32CC;
+            /*if (args.Length != 3) ShowUsage();
             if (!File.Exists(args[0])) ShowUsage();
             if (!Directory.Exists(args[2])) ShowUsage();
-
-            int songtable = 0;
 
             try
             {
@@ -22,10 +21,11 @@ namespace m4a2s
             catch
             {
                 ShowUsage();
-            }
+            }*/
 
-            string romPath = args[0];
-            string destFolder = args[2];
+            string romPath = "Pokemon Fire Red Version (U).gba";//args[0];
+            string destFolder = ".";//args[2];
+
 
             if (!Directory.Exists(destFolder + "\\seq")) Directory.CreateDirectory(destFolder + "\\seq");
             if (!Directory.Exists(destFolder + "\\wave")) Directory.CreateDirectory(destFolder + "\\wave");
@@ -46,8 +46,10 @@ namespace m4a2s
             Console.WriteLine("Index successfully build in {0} ms", sw.ElapsedMilliseconds);
 
             Hashtable index = Index.GetHashtable();
-            foreach (Entity ent in index)
+            foreach (DictionaryEntry Hent in index)
             {
+                Entity ent = (Entity) Hent.Value;
+
                 string fileName;
                 switch (ent.Type)
                 {
@@ -57,6 +59,9 @@ namespace m4a2s
                         Voicegroup.disassemble(index, ent, fileName);
                         break;
                     case EntityType.Wave:
+                        fileName = destFolder + "\\wave\\" + ent.Guid + ".s";
+                        Wave.disassemble(ent, fileName);
+                        break;
                     case EntityType.GbWave:
                         fileName = destFolder + "\\wave\\" + ent.Guid + ".s";
                         GbWave.disassemble(ent, fileName);

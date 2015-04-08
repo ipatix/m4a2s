@@ -52,108 +52,134 @@ namespace m4a2s
                 Rom.Reader.BaseStream.Position += 4;
                 int voicegroupOffset = Rom.Reader.ReadInt32() - Rom.Map;
                 if (!_hashtable.Contains(voicegroupOffset))
-                    _hashtable.Add(voicegroupOffset, new Entity(EntityType.Bank, voicegroupOffset, _bankGuids + "_" + numVoicegroups++.ToString("D3"), 128));
-
-                for (int i = 0; i < 128; i++) // 128 = amount of instruments in voicegroup
                 {
-                    Rom.Reader.BaseStream.Position = voicegroupOffset + (12*i); // 12 = length of instrument declaration
-                    uint instrumentType = Rom.Reader.ReadUInt32();
-                    instrumentType &= 0xFF;  // cut off unimportant information
-                    if (instrumentType == 0x0 || instrumentType == 0x8 || instrumentType == 0x10 || instrumentType == 0x18)
+                    _hashtable.Add(voicegroupOffset,
+                        new Entity(EntityType.Bank, voicegroupOffset, _bankGuids + "_" + numVoicegroups++.ToString("D3"),
+                            128));
+
+                    for (int i = 0; i < 128; i++) // 128 = amount of instruments in voicegroup
                     {
-                        /*
+                        Rom.Reader.BaseStream.Position = voicegroupOffset + (12*i);
+                            // 12 = length of instrument declaration
+                        uint instrumentType = Rom.Reader.ReadUInt32();
+                        instrumentType &= 0xFF; // cut off unimportant information
+                        if (instrumentType == 0x0 || instrumentType == 0x8 || instrumentType == 0x10 ||
+                            instrumentType == 0x18)
+                        {
+                            /*
                          * This seems to be a direct instrument declaration, let's collect the wave sample in our hashtable
                          */
-                        Rom.Reader.BaseStream.Position = voicegroupOffset + (12*i) + 4;
-                        int samplePointer = Rom.Reader.ReadInt32() - Rom.Map;
-                        if (IsValidPointer(samplePointer) && !_hashtable.Contains(samplePointer))
-                            _hashtable.Add(samplePointer, new Entity(EntityType.Wave, samplePointer, _waveGuids + "_" + numSamples++.ToString("D3"), -1));
-                    }
-                    else if (instrumentType == 0x03 || instrumentType == 0xB)
-                    {
-                        Rom.Reader.BaseStream.Position = voicegroupOffset + (12*i) + 4;
-                        int wavePointer = Rom.Reader.ReadInt32() - Rom.Map;
-                        if (IsValidPointer(wavePointer) && !_hashtable.Contains(wavePointer))
-                            _hashtable.Add(wavePointer, new Entity(EntityType.GbWave, wavePointer, _gbwaveGuids + "_" + numWaves++.ToString("D3"), -1));
-                    }
-                    else if (instrumentType == 0x40)
-                    {
-                        Rom.Reader.BaseStream.Position = voicegroupOffset + (12*i) + 4;
-                        int subInstruments = Rom.Reader.ReadInt32() - Rom.Map;
-                        int keyMapTable = Rom.Reader.ReadInt32() - Rom.Map;
-
-                        if (IsValidPointer(keyMapTable))
+                            Rom.Reader.BaseStream.Position = voicegroupOffset + (12*i) + 4;
+                            int samplePointer = Rom.Reader.ReadInt32() - Rom.Map;
+                            if (IsValidRectifiedPointer(samplePointer) && !_hashtable.Contains(samplePointer))
+                                _hashtable.Add(samplePointer,
+                                    new Entity(EntityType.Wave, samplePointer,
+                                        _waveGuids + "_" + numSamples++.ToString("D3"), -1));
+                        }
+                        else if (instrumentType == 0x03 || instrumentType == 0xB)
                         {
-                            if (!_hashtable.Contains(keyMapTable))
-                                _hashtable.Add(keyMapTable, new Entity(EntityType.KeyMap, keyMapTable, _mapGuids + "_" + numMaps++.ToString("D3"), -1));
+                            Rom.Reader.BaseStream.Position = voicegroupOffset + (12*i) + 4;
+                            int wavePointer = Rom.Reader.ReadInt32() - Rom.Map;
+                            if (IsValidRectifiedPointer(wavePointer) && !_hashtable.Contains(wavePointer))
+                                _hashtable.Add(wavePointer,
+                                    new Entity(EntityType.GbWave, wavePointer,
+                                        _gbwaveGuids + "_" + numWaves++.ToString("D3"), -1));
+                        }
+                        else if (instrumentType == 0x40)
+                        {
+                            Rom.Reader.BaseStream.Position = voicegroupOffset + (12*i) + 4;
+                            int subInstruments = Rom.Reader.ReadInt32() - Rom.Map;
+                            int keyMapTable = Rom.Reader.ReadInt32() - Rom.Map;
 
-                            int numSubInstruments = GetNumInstrumentsByKeyMap(keyMapTable);
-
-                            if (IsValidPointer(subInstruments) && !_hashtable.Contains(subInstruments))
+                            if (IsValidRectifiedPointer(keyMapTable))
                             {
-                                _hashtable.Add(subInstruments, new Entity(EntityType.Bank, subInstruments, _bankGuids + "_" + numVoicegroups++.ToString("D3"), numSubInstruments));
-                                for (int j = 0; j < numSubInstruments; j++)
+                                if (!_hashtable.Contains(keyMapTable))
+                                    _hashtable.Add(keyMapTable,
+                                        new Entity(EntityType.KeyMap, keyMapTable,
+                                            _mapGuids + "_" + numMaps++.ToString("D3"), -1));
+
+                                int numSubInstruments = GetNumInstrumentsByKeyMap(keyMapTable);
+
+                                if (IsValidRectifiedPointer(subInstruments) && !_hashtable.Contains(subInstruments))
                                 {
-                                    Rom.Reader.BaseStream.Position = subInstruments + (12*j);
+                                    _hashtable.Add(subInstruments,
+                                        new Entity(EntityType.Bank, subInstruments,
+                                            _bankGuids + "_" + numVoicegroups++.ToString("D3"), numSubInstruments));
+                                    for (int j = 0; j < numSubInstruments; j++)
+                                    {
+                                        Rom.Reader.BaseStream.Position = subInstruments + (12*j);
+                                        uint subInstrumentType = Rom.Reader.ReadUInt32();
+                                        subInstrumentType &= 0xFF;
+
+                                        if (subInstrumentType == 0x0 || subInstrumentType == 0x8 ||
+                                            subInstrumentType == 0x18 ||
+                                            subInstrumentType == 0x10)
+                                        {
+                                            Rom.Reader.BaseStream.Position = subInstruments + (12*j) + 4;
+                                            int samplePointer = Rom.Reader.ReadInt32() - Rom.Map;
+                                            if (IsValidPointer(samplePointer) && !_hashtable.Contains(samplePointer))
+                                                _hashtable.Add(samplePointer,
+                                                    new Entity(EntityType.Wave, samplePointer,
+                                                        _waveGuids + "_" + numSamples++.ToString("D3"), 128));
+
+                                        }
+                                        else if (instrumentType == 0x3 || instrumentType == 0xB)
+                                        {
+                                            Rom.Reader.BaseStream.Position = subInstruments + (12*j) + 4;
+                                            int wavePointer = Rom.Reader.ReadInt32() - Rom.Map;
+                                            if (IsValidRectifiedPointer(wavePointer) && !_hashtable.Contains(wavePointer))
+                                                _hashtable.Add(wavePointer,
+                                                    new Entity(EntityType.Wave, wavePointer,
+                                                        _gbwaveGuids + "_" + numWaves++.ToString("D3"), -1));
+                                        }
+                                    }
+                                } // end of sub instrument verification
+                            } // end of keymap verification
+                        }
+                        else if (instrumentType == 0x80)
+                        {
+                            Rom.Reader.BaseStream.Position = voicegroupOffset + (12*i) + 4;
+                            int subVoicegroup = Rom.Reader.ReadInt32() - Rom.Map;
+                            /*
+                         * let's do the same procedute for this subtable
+                         */
+                            if (IsValidRectifiedPointer(subVoicegroup) && !_hashtable.Contains(subVoicegroup))
+                            {
+                                _hashtable.Add(subVoicegroup,
+                                    new Entity(EntityType.Bank, subVoicegroup,
+                                        _drumGuids + "_" + numDrumtables++.ToString("D3"), 128));
+                                for (int j = 0; j < 128; j++)
+                                {
+                                    Rom.Reader.BaseStream.Position = subVoicegroup + (12*j);
                                     uint subInstrumentType = Rom.Reader.ReadUInt32();
                                     subInstrumentType &= 0xFF;
 
-                                    if (subInstrumentType == 0x0 || subInstrumentType == 0x8 || subInstrumentType == 0x18 ||
-                                    subInstrumentType == 0x10)
+                                    if (subInstrumentType == 0x0 || subInstrumentType == 0x8 ||
+                                        subInstrumentType == 0x18 ||
+                                        subInstrumentType == 0x10)
                                     {
-                                        Rom.Reader.BaseStream.Position = subInstruments + (12*j) + 4;
+                                        Rom.Reader.BaseStream.Position = subVoicegroup + (12*j) + 4;
                                         int samplePointer = Rom.Reader.ReadInt32() - Rom.Map;
-                                        if (IsValidPointer(samplePointer) && !_hashtable.Contains(samplePointer))
-                                            _hashtable.Add(samplePointer, new Entity(EntityType.Wave, samplePointer, _waveGuids + "_" + numSamples++.ToString("D3"), 128));
+                                        if (IsValidRectifiedPointer(samplePointer) && !_hashtable.Contains(samplePointer))
+                                            _hashtable.Add(samplePointer,
+                                                new Entity(EntityType.Wave, samplePointer,
+                                                    _waveGuids + "_" + numSamples++.ToString("D3"), 128));
 
                                     }
                                     else if (instrumentType == 0x3 || instrumentType == 0xB)
                                     {
-                                        Rom.Reader.BaseStream.Position = subInstruments + (12*j) + 4;
+                                        Rom.Reader.BaseStream.Position = subVoicegroup + (12*j) + 4;
                                         int wavePointer = Rom.Reader.ReadInt32() - Rom.Map;
-                                        if (IsValidPointer(wavePointer) && !_hashtable.Contains(wavePointer))
-                                            _hashtable.Add(wavePointer, new Entity(EntityType.Wave, wavePointer, _gbwaveGuids + "_" + numWaves++.ToString("D3"), -1));
+                                        if (IsValidRectifiedPointer(wavePointer) && !_hashtable.Contains(wavePointer))
+                                            _hashtable.Add(wavePointer,
+                                                new Entity(EntityType.Wave, wavePointer,
+                                                    _gbwaveGuids + "_" + numWaves++.ToString("D3"), -1));
                                     }
-                                }
-                            } // end of sub instrument verification
-                        } // end of keymap verification
-                    }
-                    else if (instrumentType == 0x80)
-                    {
-                        Rom.Reader.BaseStream.Position = voicegroupOffset + (12*i) + 4;
-                        int subVoicegroup = Rom.Reader.ReadInt32() - Rom.Map;
-                        /*
-                         * let's do the same procedute for this subtable
-                         */
-                        if (IsValidPointer(subVoicegroup) && !_hashtable.Contains(subVoicegroup))
-                        {
-                            _hashtable.Add(subVoicegroup, new Entity(EntityType.Bank, subVoicegroup, _drumGuids + "_" + numDrumtables++.ToString("D3"), 128));
-                            for (int j = 0; j < 128; j++)
-                            {
-                                Rom.Reader.BaseStream.Position = subVoicegroup + (12*j);
-                                uint subInstrumentType = Rom.Reader.ReadUInt32();
-                                subInstrumentType &= 0xFF;
-
-                                if (subInstrumentType == 0x0 || subInstrumentType == 0x8 || subInstrumentType == 0x18 ||
-                                    subInstrumentType == 0x10)
-                                {
-                                    Rom.Reader.BaseStream.Position = subVoicegroup + (12*j) + 4;
-                                    int samplePointer = Rom.Reader.ReadInt32() - Rom.Map;
-                                    if (IsValidPointer(samplePointer) && !_hashtable.Contains(samplePointer))
-                                        _hashtable.Add(samplePointer, new Entity(EntityType.Wave, samplePointer, _waveGuids + "_" + numSamples++.ToString("D3"), 128));
-                                    
-                                }
-                                else if (instrumentType == 0x3 || instrumentType == 0xB)
-                                {
-                                    Rom.Reader.BaseStream.Position = subVoicegroup + (12*j) + 4;
-                                    int wavePointer = Rom.Reader.ReadInt32() - Rom.Map;
-                                    if (IsValidPointer(wavePointer) && !_hashtable.Contains(wavePointer))
-                                        _hashtable.Add(wavePointer, new Entity(EntityType.Wave, wavePointer, _gbwaveGuids + "_" + numWaves++.ToString("D3"), -1));
                                 }
                             }
                         }
-                    }
-                } // end of voicegroup loop
+                    } // end of voicegroup loop
+                }
             } // end of song loop
 
             /*
@@ -168,7 +194,9 @@ namespace m4a2s
              * After that we save song header information into variables
              */
             Rom.Reader.BaseStream.Position = Rom.SongtableOffset + (songNum*8);
-            Rom.Reader.BaseStream.Position = Rom.Reader.ReadInt32() - Rom.Map;
+            int songPos = Rom.Reader.ReadInt32();
+            if (!IsValidPointer(songPos)) return false;
+            Rom.Reader.BaseStream.Position = songPos - Rom.Map;
             byte numTracks = Rom.Reader.ReadByte();
             byte numBlocks = Rom.Reader.ReadByte();
             byte priority = Rom.Reader.ReadByte();
@@ -189,9 +217,15 @@ namespace m4a2s
             return true;
         }
 
-        private static bool IsValidPointer(int pointer)
+        public static bool IsValidPointer(int pointer)
         {
-            if (pointer - Rom.Map < 0 || pointer - Rom.Map > Rom.RomSize) return false;
+            if (pointer - Rom.Map < 0 || pointer - Rom.Map >= Rom.RomSize) return false;
+            return true;
+        }
+
+        public static bool IsValidRectifiedPointer(int pointer)
+        {
+            if (pointer < 0 || pointer >= Rom.RomSize) return false;
             return true;
         }
 

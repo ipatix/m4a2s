@@ -48,7 +48,7 @@ namespace m4a2s
 
             for (int cTrack = 0; cTrack < numTracks; cTrack++)
             {
-                oasm.AppendLine("@*********************** Track " + (cTrack + 1).toString("D2") + " ***********************@");
+                oasm.AppendLine("@*********************** Track " + (cTrack + 1).ToString("D2") + " ***********************@");
                 oasm.AppendLine();
                 oasm.AppendLine(song.Guid + "_" + cTrack + ":");
                 
@@ -70,6 +70,8 @@ namespace m4a2s
                     else if (cmd == 0xB1)
                     {
                         oasm.AppendLine("\t.byte\tFINE");
+                        oasm.AppendLine();
+                        break;
                     }
                     // if GOTO
                     else if (cmd == 0xB2)
@@ -151,7 +153,7 @@ namespace m4a2s
                         string str;
                         if (pan < 0x40) str = (pan - 0x40).ToString();
                         else str = "+" + (pan - 0x40);
-                        oasm.AppendLine("\t.byte\t\tPAN   , " + str);
+                        oasm.AppendLine("\t.byte\t\tPAN   , c_v" + str);
                         lastEvent = Event.Pan;
                     }
                     // if BEND
@@ -161,7 +163,7 @@ namespace m4a2s
                         string str;
                         if (bend < 0x40) str = (bend - 0x40).ToString();
                         else str = "+" + (bend - 0x40);
-                        oasm.AppendLine("\t.byte\t\tBEND  , " + str);
+                        oasm.AppendLine("\t.byte\t\tBEND  , c_v" + str);
                         lastEvent = Event.Bend;
                     }
                     // if BENDR
@@ -204,8 +206,8 @@ namespace m4a2s
                         string str;
                         if (tune < 0x40) str = (tune - 0x40).ToString();
                         else str = "+" + (tune - 0x40);
-                        oasm.AppendLine("\t.byte\t\tBEND  , " + str);
-                        lastEvent = Event.Bend;
+                        oasm.AppendLine("\t.byte\t\tTUNE  , c_v" + str);
+                        lastEvent = Event.Tune;
                     }
                     // if XCMD
                     else if (cmd == 0xCD)
@@ -224,13 +226,14 @@ namespace m4a2s
                         {
                             throw new NotSupportedException("Invalid XCMD Type");
                         }
+                        lastEvent = Event.Xcmd;
                     }
                     // if EOT
                     else if (cmd == 0xCE)
                     {
                         if (Rom.ReaderPeekByte() <= 127)
                         {
-                            oasm.AppendLine("\t.byte\t\tEOT   , " + Tables.Nxx[Rom.Reader.ReadByte()]);
+                            oasm.AppendLine("\t.byte\t\tEOT   , " + Tables.Note[Rom.Reader.ReadByte()]);
                         }
                         else
                         {
@@ -249,7 +252,7 @@ namespace m4a2s
                         }
                         else
                         {
-                            oasm.AppendLine("   , " + Tables.Note[Rom.Reader.ReadByte()]);
+                            oasm.Append("   , " + Tables.Note[Rom.Reader.ReadByte()]);
                             if (Rom.ReaderPeekByte() > 127) // peek note velocity
                             {
                                 oasm.AppendLine();
@@ -267,6 +270,7 @@ namespace m4a2s
                                 }
                             }
                         }
+                        lastEvent = Event.Note;
                     }
                     else if (cmd >= 0x0 && cmd <= 0x7F)
                     {
@@ -292,6 +296,7 @@ namespace m4a2s
                         }
                         else if (lastEvent == Event.None)
                         {
+                            Console.Write(oasm.ToString());
                             throw new Exception("Trying to repeat an event that hasn't occured yet");
                         }
                         else if (lastEvent == Event.Note)
@@ -349,6 +354,7 @@ namespace m4a2s
                             }
                             else
                             {
+                                Console.Write(oasm.ToString());
                                 throw new NotSupportedException("Invalid XCMD Type");
                             }
                         }

@@ -353,12 +353,15 @@ namespace m4a2s
             {
                 if (i%8 == 0)
                     oasm.Append(Environment.NewLine + "\t.byte\t");
-                else oasm.Append("0x" + Rom.Reader.ReadByte().ToString("X2"));
+                else oasm.Append(", ");
+                oasm.Append("0x" + Rom.Reader.ReadByte().ToString("X2"));
             }
 
             oasm.AppendLine();
             oasm.AppendLine();
             oasm.AppendLine("\t.end");
+
+            File.WriteAllText(destFile, oasm.ToString());
         }
     }
 }

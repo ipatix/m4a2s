@@ -117,7 +117,7 @@ namespace m4a2s
                                         {
                                             Rom.Reader.BaseStream.Position = subInstruments + (12*j) + 4;
                                             int samplePointer = Rom.Reader.ReadInt32() - Rom.Map;
-                                            if (IsValidPointer(samplePointer) && !_hashtable.Contains(samplePointer))
+                                            if (IsValidRectifiedPointer(samplePointer) && !_hashtable.Contains(samplePointer))
                                                 _hashtable.Add(samplePointer,
                                                     new Entity(EntityType.Wave, samplePointer,
                                                         _waveGuids + "_" + numSamples++.ToString("D3"), 128));
@@ -246,7 +246,7 @@ namespace m4a2s
                 byte mapping = Rom.Reader.ReadByte();
                 if (mapping > biggestInstrument && mapping < 128) biggestInstrument = mapping;
             }
-            return biggestInstrument;
+            return biggestInstrument + 1;
         }
     }
 }

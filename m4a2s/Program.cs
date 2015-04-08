@@ -44,6 +44,8 @@ namespace m4a2s
             Index.IndexRom();
             sw.Stop();
             Console.WriteLine("Index successfully build in {0} ms", sw.ElapsedMilliseconds);
+            sw.Reset();
+            sw.Start();
 
             Hashtable index = Index.GetHashtable();
             foreach (DictionaryEntry Hent in index)
@@ -54,9 +56,12 @@ namespace m4a2s
                 switch (ent.Type)
                 {
                     case EntityType.Bank:
-                    case EntityType.KeyMap:
                         fileName = destFolder + "\\bank\\" + ent.Guid + ".s";
                         Voicegroup.disassemble(index, ent, fileName);
+                        break;
+                    case EntityType.KeyMap:
+                        fileName = destFolder + "\\bank\\" + ent.Guid + ".s";
+                        KeyMap.disassemble(ent, fileName);
                         break;
                     case EntityType.Wave:
                         fileName = destFolder + "\\wave\\" + ent.Guid + ".s";
@@ -77,8 +82,11 @@ namespace m4a2s
                 Console.WriteLine("Succesfully disassembled Entity from 0x{0} to file: {1}", ent.Offset.ToString("X7"), fileName);
             }
 
+
             Songtable.disassemble(index, destFolder + "\\_songtable.s");
+            sw.Stop();
             Console.WriteLine("Succesfully disassembled Songtable from 0x{0}", Rom.SongtableOffset);
+            Console.WriteLine("Finished exporting data after {0} ms", sw.ElapsedMilliseconds);
         }
 
         

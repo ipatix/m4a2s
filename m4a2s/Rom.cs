@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace m4a2s
@@ -10,6 +6,7 @@ namespace m4a2s
     static class Rom
     {
         public static int SongtableOffset { get; private set; }
+        public static int NumSongs { get; set; }
         private static byte[] _rom;
         public static MemoryStream RomStream { get; private set; }
         public static BinaryReader Reader { get; private set; }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 
 namespace m4a2s
 {
@@ -32,6 +26,7 @@ namespace m4a2s
              */
             _hashtable = new Hashtable();
             _numSongs = GetNumSongs();
+            Rom.NumSongs = _numSongs;
             /*
              * now we will index all our songs
              */

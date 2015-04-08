@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace m4a2s
+﻿namespace m4a2s
 {
     static class Tables
     {
@@ -254,7 +247,7 @@ namespace m4a2s
             "En8 ",
             "Fn8 ",
             "Fs8 ",
-            "Gn8 ",
+            "Gn8 "
         };
 
         public static readonly string[] Memacc =

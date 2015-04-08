@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace m4a2s
 {
     class Wave
     {
-        public static void disassemble(Hashtable index, Entity wave, string destFile)
+        public static void disassemble(Entity wave, string destFile)
         {
             StringBuilder oasm = new StringBuilder();
 
@@ -30,7 +26,7 @@ namespace m4a2s
             oasm.AppendLine("\t.hword\t0x" + type.ToString("X4") + ", 0x" +
                             Rom.Reader.ReadUInt16().ToString("X4"));
             int frequency = Rom.Reader.ReadInt16();
-            oasm.AppendLine("\t.word\t0x" + frequency.ToString("X") + " @ Mid-C pitch ~" + ((double) frequency/1024.0) +
+            oasm.AppendLine("\t.word\t0x" + frequency.ToString("X") + " @ Mid-C pitch ~" + (frequency/1024.0) +
                             " Hz");
             
             if (type != 0x0)
@@ -94,7 +90,7 @@ namespace m4a2s
 
     class GbWave
     {
-        public static void disassemble(Hashtable index, Entity gbwave, string destFile)
+        public static void disassemble(Entity gbwave, string destFile)
         {
             StringBuilder oasm = new StringBuilder();
 

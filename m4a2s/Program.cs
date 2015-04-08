@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace m4a2s
 {
@@ -14,8 +10,8 @@ namespace m4a2s
         static void Main(string[] args)
         {
             if (args.Length != 3) ShowUsage();
-            if (!System.IO.File.Exists(args[0])) ShowUsage();
-            if (!System.IO.Directory.Exists(args[2])) ShowUsage();
+            if (!File.Exists(args[0])) ShowUsage();
+            if (!Directory.Exists(args[2])) ShowUsage();
 
             int songtable = 0;
 
@@ -23,7 +19,7 @@ namespace m4a2s
             {
                 songtable = Convert.ToInt32(args[1], 16);
             }
-            catch (Exception e)
+            catch
             {
                 ShowUsage();
             }
@@ -31,9 +27,9 @@ namespace m4a2s
             string romPath = args[0];
             string destFolder = args[2];
 
-            if (Directory.Exists(destFolder + "\\seq")) Directory.CreateDirectory(destFolder + "\\seq");
-            if (Directory.Exists(destFolder + "\\wave")) Directory.CreateDirectory(destFolder + "\\wave");
-            if (Directory.Exists(destFolder + "\\bank")) Directory.CreateDirectory(destFolder + "\\bank");
+            if (!Directory.Exists(destFolder + "\\seq")) Directory.CreateDirectory(destFolder + "\\seq");
+            if (!Directory.Exists(destFolder + "\\wave")) Directory.CreateDirectory(destFolder + "\\wave");
+            if (!Directory.Exists(destFolder + "\\bank")) Directory.CreateDirectory(destFolder + "\\bank");
             
 
             Rom.LoadRom(romPath, songtable);
@@ -52,21 +48,32 @@ namespace m4a2s
             Hashtable index = Index.GetHashtable();
             foreach (Entity ent in index)
             {
+                string fileName;
                 switch (ent.Type)
                 {
-                        case EntityType.Bank:
-
+                    case EntityType.Bank:
+                    case EntityType.KeyMap:
+                        fileName = destFolder + "\\bank\\" + ent.Guid + ".s";
+                        Voicegroup.disassemble(index, ent, fileName);
                         break;
-                        case EntityType.GbWave:
+                    case EntityType.Wave:
+                    case EntityType.GbWave:
+                        fileName = destFolder + "\\wave\\" + ent.Guid + ".s";
+                        GbWave.disassemble(ent, fileName);
                         break;
-                        case EntityType.KeyMap:
+                    case EntityType.Song:
+                        fileName = destFolder + "\\seq\\" + ent.Guid + ".s";
+                        Song.disassemble(index, ent, fileName);
                         break;
-                        case EntityType.Song:
-                        break;
-                        case EntityType.Wave:
-
+                    default:
+                        throw new Exception("Invalid Entity Type!");
                 }
+
+                Console.WriteLine("Succesfully disassembled Entity from 0x{0} to file: {1}", ent.Offset.ToString("X7"), fileName);
             }
+
+            Songtable.disassemble(index, destFolder + "\\_songtable.s");
+            Console.WriteLine("Succesfully disassembled Songtable from 0x{0}", Rom.SongtableOffset);
         }
 
         

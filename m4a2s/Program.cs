@@ -1,4 +1,23 @@
-﻿using System;
+﻿/*
+ * m4a2s is aprogram to to dump sound files from m4a/mp2k GBA games to pseudo-assembly source files
+ * Copyright (C) 2015 ipatix
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
+ */
+
+using System;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
@@ -9,8 +28,14 @@ namespace m4a2s
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("m4a2s version 0.1, Copyright (C) 2015 ipatix");
+            Console.WriteLine("m4a2s comes with ABSOLUTELY NO WARRANTY; for details see LICENSE.txt");
+            Console.WriteLine("This is free software, and you are welcome to redistribute it");
+            Console.WriteLine("under certain conditions; see LICENSE.txt for details.");
+
+
             int songtable = 0x4A32CC;
-            /*if (args.Length != 3) ShowUsage();
+            if (args.Length != 3) ShowUsage();
             if (!File.Exists(args[0])) ShowUsage();
             if (!Directory.Exists(args[2])) ShowUsage();
 
@@ -21,10 +46,10 @@ namespace m4a2s
             catch
             {
                 ShowUsage();
-            }*/
+            }
 
-            string romPath = "Pokemon Fire Red Version (U).gba";//args[0];
-            string destFolder = ".";//args[2];
+            string romPath = args[0];
+            string destFolder = args[2];
 
 
             if (!Directory.Exists(destFolder + "\\seq")) Directory.CreateDirectory(destFolder + "\\seq");

@@ -34,7 +34,7 @@ namespace m4a2s
             Console.WriteLine("under certain conditions; see LICENSE.txt for details.");
 
 
-            int songtable = 0x4A32CC;
+            int songtable;
             if (args.Length != 3) ShowUsage();
             if (!File.Exists(args[0])) ShowUsage();
             if (!Directory.Exists(args[2])) ShowUsage();

@@ -34,7 +34,7 @@ namespace m4a2s
             Console.WriteLine("under certain conditions; see LICENSE.txt for details.");
 
 
-            int songtable;
+            int songtable = 0;
             if (args.Length != 3) ShowUsage();
             if (!File.Exists(args[0])) ShowUsage();
             if (!Directory.Exists(args[2])) ShowUsage();
@@ -119,7 +119,7 @@ namespace m4a2s
         static void ShowUsage()
         {
             Console.WriteLine("Usage:");
-            Console.WriteLine("m4a2s <GBA-ROM.gba> <Songtable-HEX>");
+            Console.WriteLine("m4a2s <GBA-ROM.gba> <Songtable-HEX> <Destination-Folder>");
             Environment.Exit(0);
         }
     }

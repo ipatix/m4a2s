@@ -63,12 +63,12 @@ namespace m4a2s
                 // hash all songs
                 Rom.Reader.BaseStream.Position = Rom.SongtableOffset + (currentSong * 8);
                 int currentSongPointer = Rom.Reader.ReadInt32() - Rom.Map;
-                Rom.Reader.ReadInt32(); // drop the two song group bytes x2 cuz we don't need 'em
+                Rom.Reader.BaseStream.Position = currentSongPointer;
+                if (Rom.Reader.ReadByte() <= 0) continue;
+                Rom.Reader.BaseStream.Position += 3;
                 if (!_hashtable.Contains(currentSongPointer))
                     _hashtable.Add(currentSongPointer, new Entity(EntityType.Song, currentSongPointer, _songGuids + "_" + currentSong.ToString("D3"), -1));
                 // now hash the voicegroup
-                Rom.Reader.BaseStream.Position = currentSongPointer;
-                Rom.Reader.BaseStream.Position += 4;
                 int voicegroupOffset = Rom.Reader.ReadInt32() - Rom.Map;
                 if (!_hashtable.Contains(voicegroupOffset))
                 {
@@ -226,7 +226,7 @@ namespace m4a2s
              * the 3 lower bytes aren't needed for the verification but we might use it in the *future*
              */
 
-            if (!IsValidPointer(voicegroupOffset)) return false;
+            if (numTracks > 0 && !IsValidPointer(voicegroupOffset)) return false;
 
             for (int i = 0; i < numTracks; i++)
             {

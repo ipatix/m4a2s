@@ -41,9 +41,11 @@ namespace m4a2s
             for (int i = 0; i < Rom.NumSongs; i++)
             {
                 Rom.Reader.BaseStream.Position = Rom.SongtableOffset + (i*8);
+                int songheader = Rom.Reader.ReadInt32() - Rom.Map;
+                if (!index.Contains(songheader)) continue;
                 oasm.AppendLine("@**************** Song " + i.ToString("D4") + " ****************@");
                 oasm.AppendLine();
-                oasm.AppendLine("\t.word\t" + ((Entity)index[Rom.Reader.ReadInt32() - Rom.Map]).Guid);
+                oasm.AppendLine("\t.word\t" + ((Entity)index[songheader]).Guid);
                 oasm.AppendLine("\t.byte\t0x" + Rom.Reader.ReadByte().ToString("X2") + ", 0x" +
                                 Rom.Reader.ReadByte().ToString("X2") + ", 0x" + Rom.Reader.ReadByte().ToString("X2") +
                                 ", 0x" + Rom.Reader.ReadByte().ToString("X2"));

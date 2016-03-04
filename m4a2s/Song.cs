@@ -99,6 +99,9 @@ namespace m4a2s
                         int targetPosition = Rom.Reader.ReadInt32() - Rom.Map;
                         oasm.AppendLine("\t .word\t" + song.Guid + "_" + cTrack + " + 0x" +
                                         (targetPosition - trackOffsets[cTrack]).ToString("X"));
+                        oasm.AppendLine("\t.byte\tFINE");
+                        oasm.AppendLine();
+                        break;
                     }
                     // if PATT
                     else if (cmd == 0xB3)

@@ -52,9 +52,9 @@ namespace m4a2s
             string destFolder = args[2];
 
 
-            if (!Directory.Exists(destFolder + "\\seq")) Directory.CreateDirectory(destFolder + "\\seq");
-            if (!Directory.Exists(destFolder + "\\wave")) Directory.CreateDirectory(destFolder + "\\wave");
-            if (!Directory.Exists(destFolder + "\\bank")) Directory.CreateDirectory(destFolder + "\\bank");
+            if (!Directory.Exists(Path.Combine(destFolder, "seq"))) Directory.CreateDirectory(Path.Combine(destFolder, "seq"));
+            if (!Directory.Exists(Path.Combine(destFolder, "wave"))) Directory.CreateDirectory(Path.Combine(destFolder, "wave"));
+            if (!Directory.Exists(Path.Combine(destFolder, "bank"))) Directory.CreateDirectory(Path.Combine(destFolder, "bank"));
             
 
             Rom.LoadRom(romPath, songtable);
@@ -81,23 +81,23 @@ namespace m4a2s
                 switch (ent.Type)
                 {
                     case EntityType.Bank:
-                        fileName = destFolder + "\\bank\\" + ent.Guid + ".s";
+                        fileName = Path.Combine(Path.Combine(destFolder, "bank"), ent.Guid + ".s");
                         Voicegroup.disassemble(index, ent, fileName);
                         break;
                     case EntityType.KeyMap:
-                        fileName = destFolder + "\\bank\\" + ent.Guid + ".s";
+                        fileName = Path.Combine(Path.Combine(destFolder, "bank"), ent.Guid + ".s");
                         KeyMap.disassemble(ent, fileName);
                         break;
                     case EntityType.Wave:
-                        fileName = destFolder + "\\wave\\" + ent.Guid + ".s";
+                        fileName = Path.Combine(Path.Combine(destFolder, "wave"), ent.Guid + ".s");
                         Wave.disassemble(ent, fileName);
                         break;
                     case EntityType.GbWave:
-                        fileName = destFolder + "\\wave\\" + ent.Guid + ".s";
+                        fileName = Path.Combine(Path.Combine(destFolder, "wave"), ent.Guid + ".s");
                         GbWave.disassemble(ent, fileName);
                         break;
                     case EntityType.Song:
-                        fileName = destFolder + "\\seq\\" + ent.Guid + ".s";
+                        fileName = Path.Combine(Path.Combine(destFolder, "seq"), ent.Guid + ".s");
                         Song.disassemble(index, ent, fileName);
                         break;
                     default:
@@ -108,7 +108,7 @@ namespace m4a2s
             }
 
 
-            Songtable.disassemble(index, destFolder + "\\_songtable.s");
+            Songtable.disassemble(index, Path.Combine(destFolder, "_songtable.s"));
             sw.Stop();
             Console.WriteLine("Succesfully disassembled Songtable from 0x{0}", Rom.SongtableOffset);
             Console.WriteLine("Finished exporting data after {0} ms", sw.ElapsedMilliseconds);

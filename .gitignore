@@ -6,6 +6,7 @@
 *.user
 *.sln.docstates
 *.exe
+data/
 
 # Build results
 

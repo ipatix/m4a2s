@@ -40,10 +40,11 @@ namespace m4a2s
             oasm.AppendLine();
 
             ushort type = Rom.Reader.ReadUInt16();
+            ushort loopMode = Rom.Reader.ReadUInt16();
 
 
             oasm.AppendLine("\t.hword\t0x" + type.ToString("X4") + ", 0x" +
-                            Rom.Reader.ReadUInt16().ToString("X4"));
+                            loopMode.ToString("X4"));
             int frequency = Rom.Reader.ReadInt32();
             oasm.AppendLine("\t.word\t0x" + frequency.ToString("X") + " @ Mid-C pitch ~" + (frequency/1024.0) +
                             " Hz");
@@ -62,6 +63,9 @@ namespace m4a2s
 
             oasm.AppendLine("\t.word\t" + loopStart + " @ Loop Start");
             oasm.AppendLine("\t.word\t" + loopEnd + " @ Loop End");
+
+            if (loopMode == 0x4000)
+                loopEnd += 1;       // extract one extra sample (the one used for interpolation) for looped samples
 
             int sampleCount = loopEnd;
 

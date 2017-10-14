@@ -28,7 +28,7 @@ namespace m4a2s
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("m4a2s version 0.1, Copyright (C) 2015 ipatix");
+            Console.WriteLine("m4a2s version 0.1, Copyright (C) 2017 ipatix");
             Console.WriteLine("m4a2s comes with ABSOLUTELY NO WARRANTY; for details see LICENSE.txt");
             Console.WriteLine("This is free software, and you are welcome to redistribute it");
             Console.WriteLine("under certain conditions; see LICENSE.txt for details.");
